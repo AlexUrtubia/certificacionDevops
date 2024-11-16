@@ -1,24 +1,29 @@
 pipeline {
     agent any
+    tools {
+        jdk 'JDK17'
+        maven 'Maven3'
+    }
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Build') {
             steps {
-                // Compila el proyecto Java utilizando Maven
                 sh 'mvn clean package'
             }
         }
         stage('Test') {
             steps {
-                // Ejecuta las pruebas unitarias
                 sh 'mvn test'
             }
         }
-        stage('Deploy') {
+        stage('Run') {
             steps {
-                // Construye la imagen Docker
-                sh 'docker build -t myapp .'
-                // Levanta el contenedor en el puerto 8081
-                sh 'docker run -d -p 8081:8080 myapp'
+                sh 'java -jar target/hola-mundo-0.0.1-SNAPSHOT.jar & sleep 5'
+                sh 'curl -f http://localhost:8081 || (echo "Server not responding!" && exit 1)'
             }
         }
     }
